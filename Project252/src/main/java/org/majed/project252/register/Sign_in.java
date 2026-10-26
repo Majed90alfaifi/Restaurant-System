@@ -67,9 +67,10 @@ public class Sign_in implements Register {
         if(phone.equals("0000")) {
             adminPage=new AdminPage();
             adminPage.displayAdminPage();
-        }else
+        }else {
             menu=new Menu();
             menu.displayMenu();
+        }
     }
 
 
