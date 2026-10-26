@@ -48,10 +48,20 @@ Database credentials are provided through environment variables rather than bein
 ## How to Run
 
 1. Clone the repository.
-2. Create the required MySQL database.
+2. Create the database, tables and sample data:
+
+```bash
+mysql -u root -p < Project252.sql
+```
+
 3. Configure the following environment variables:
 
 ```text
 DB_URL
 DB_USERNAME
 DB_PASSWORD
+```
+
+If they are not set, the app connects to `jdbc:mysql://localhost:3306/cpit252project_db` as `root` with an empty password.
+
+To sign in as the admin, use phone `0000` and password `admin` (created by `Project252.sql`).
