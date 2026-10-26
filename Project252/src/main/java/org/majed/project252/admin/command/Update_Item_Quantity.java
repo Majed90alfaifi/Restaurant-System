@@ -4,7 +4,7 @@ import org.majed.project252.DB.DBConnection;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.PreparedStatement;
 import java.util.Scanner;
 
 public class Update_Item_Quantity extends Update_Item_Command {
@@ -15,7 +15,8 @@ public class Update_Item_Quantity extends Update_Item_Command {
     private Admin_Receiver admin_receiver;
     Scanner scanner=new Scanner(System.in);
     DBConnection connection = DBConnection.getInstance();
-    Statement statement = connection.getConnection().createStatement();
+    PreparedStatement findById = connection.getConnection().prepareStatement(
+            "SELECT * FROM menu_items WHERE items_id = ?");
     ResultSet resultSet;
 
     public Update_Item_Quantity(Admin_Receiver admin_receiver) throws SQLException {
@@ -28,11 +29,13 @@ public class Update_Item_Quantity extends Update_Item_Command {
         System.out.print("what item you want to update\nEnter its Id to update:" +
                 "\nEnter 0 To >Exit");
         item_Id = scanner.nextInt();
-        resultSet = statement.executeQuery("SELECT * FROM menu_items where items_id =" + item_Id + ";");
+        findById.setInt(1, item_Id);
+        resultSet = findById.executeQuery();
         while (!resultSet.next()) {
             System.out.println("Enter Correct ID : ");
             item_Id = scanner.nextInt();
-            resultSet = statement.executeQuery("SELECT * FROM menu_items where items_id =" + item_Id + ";");
+            findById.setInt(1, item_Id);
+            resultSet = findById.executeQuery();
         }
 
         item_name = resultSet.getString(2);

@@ -2,7 +2,7 @@ package org.majed.project252.register;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.PreparedStatement;
 import java.util.Scanner;
 
 import org.majed.project252.DB.DBConnection;
@@ -12,7 +12,10 @@ public class Sign_up implements Register{
     String password;
     String name;
     DBConnection connection = DBConnection.getInstance();
-    Statement statement = connection.getConnection().createStatement();
+    PreparedStatement findByPhone = connection.getConnection().prepareStatement(
+            "SELECT * FROM customer WHERE customerPhone = ?");
+    PreparedStatement insertCustomer = connection.getConnection().prepareStatement(
+            "INSERT INTO customer (`customerPhone`, `customerName`, `customerPass`) VALUES (?, ?, ?)");
     ResultSet resultSet;
     Scanner scanner = new Scanner(System.in);
 
@@ -20,22 +23,20 @@ public class Sign_up implements Register{
         System.out.println("please enter your information :");
         System.out.println("Name: ");
         name = scanner.nextLine();
-        name="'"+name+"'";
 
 
         System.out.println("Phone: ");
         phone=scanner.nextLine();
-        phone="'"+phone+"'";
         checkPhoneForSignup();
 
         System.out.println("Password: ");
         password=scanner.nextLine();
-        password="'"+password+"'";
 
     }
 
     private void checkPhoneForSignup() throws SQLException {
-            resultSet = statement.executeQuery("SELECT * FROM customer where customerPhone =" + phone + ";");
+            findByPhone.setString(1, phone);
+            resultSet = findByPhone.executeQuery();
             if (resultSet.next()) {
                 System.out.println("YOU ALREADY HAVE AN ACCOUNT!!");
                 Register sign_in = new Sign_in();
@@ -45,7 +46,10 @@ public class Sign_up implements Register{
 
     @Override
     public void Register() throws SQLException {
-        statement.executeUpdate("INSERT INTO customer ( `customerPhone`, `customerName`, `customerPass`) VALUES ("+phone+", "+name+", "+password+")");
+        insertCustomer.setString(1, phone);
+        insertCustomer.setString(2, name);
+        insertCustomer.setString(3, password);
+        insertCustomer.executeUpdate();
 
     }
 

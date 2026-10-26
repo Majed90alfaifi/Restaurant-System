@@ -6,7 +6,7 @@ import org.majed.project252.admin.page.AdminPage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.PreparedStatement;
 import java.util.Scanner;
 
 public class Delete_Item_Command implements AdminCommand {
@@ -14,7 +14,8 @@ public class Delete_Item_Command implements AdminCommand {
     DisplayItems displayItems;
     Scanner scanner=new Scanner(System.in);
     DBConnection connection = DBConnection.getInstance();
-    Statement statement = connection.getConnection().createStatement();
+    PreparedStatement findNameById = connection.getConnection().prepareStatement(
+            "SELECT item_name FROM menu_items WHERE items_id = ?");
     ResultSet resultSet;
     AdminPage adminPage;
 
@@ -28,7 +29,8 @@ public class Delete_Item_Command implements AdminCommand {
         while (true){
             System.out.print("Enter Item ID :");
             item_Id=scanner.nextInt();
-            resultSet=statement.executeQuery("SELECT item_name FROM menu_items where items_id = "+item_Id+";");
+            findNameById.setInt(1, item_Id);
+            resultSet=findNameById.executeQuery();
             if(resultSet.next()==false) {
                 System.out.println("\nTHERE IS NO ITEM WITH THIS ID !!\nTry Again:");
             }

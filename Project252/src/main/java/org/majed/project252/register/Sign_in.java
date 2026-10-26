@@ -2,7 +2,7 @@ package org.majed.project252.register;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.PreparedStatement;
 import java.util.Scanner;
 
 import org.majed.project252.DB.DBConnection;
@@ -16,7 +16,10 @@ public class Sign_in implements Register {
     AdminPage adminPage ;
     Menu menu ;
     DBConnection connection = DBConnection.getInstance();
-    Statement statement = connection.getConnection().createStatement();
+    PreparedStatement findByPhone = connection.getConnection().prepareStatement(
+            "SELECT * FROM customer WHERE customerPhone = ?");
+    PreparedStatement findByPhoneAndPassword = connection.getConnection().prepareStatement(
+            "SELECT * FROM customer WHERE customerPass = ? AND customerPhone = ?");
     ResultSet resultSet;
     Scanner scanner = new Scanner(System.in);
 
@@ -37,8 +40,9 @@ public class Sign_in implements Register {
     private void checkPassword() throws SQLException {
         while (true) {
             password = scanner.nextLine();
-            password="'"+password+"'";
-            resultSet = statement.executeQuery("SELECT * FROM customer where customerPass =" + password + "AND customerPhone =" + phone + ";");
+            findByPhoneAndPassword.setString(1, password);
+            findByPhoneAndPassword.setString(2, phone);
+            resultSet = findByPhoneAndPassword.executeQuery();
             if (resultSet.next()) {
                 break;
             }else{
@@ -49,8 +53,8 @@ public class Sign_in implements Register {
    private void checkPhoneForSignin() throws SQLException {
        while (true) {
            phone= scanner.nextLine();
-           phone="'"+phone+"'";
-           resultSet = statement.executeQuery("SELECT * FROM customer where customerPhone =" + phone + ";");
+           findByPhone.setString(1, phone);
+           resultSet = findByPhone.executeQuery();
            if (resultSet.next()) {
                break;
            } else {
@@ -60,7 +64,7 @@ public class Sign_in implements Register {
     }
 
     private void checkAdmin_OR_Customer() throws SQLException {
-        if(phone.equalsIgnoreCase("'0000'")) {
+        if(phone.equals("0000")) {
             adminPage=new AdminPage();
             adminPage.displayAdminPage();
         }else

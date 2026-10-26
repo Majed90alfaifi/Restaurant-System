@@ -2,6 +2,7 @@ package org.majed.project252.customer.page;
 
 import org.majed.project252.DB.DBConnection;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -10,6 +11,14 @@ import java.util.ArrayList;
 public class Recipt {
     DBConnection connection = DBConnection.getInstance();
     Statement statement = connection.getConnection().createStatement();
+    PreparedStatement findItemName = connection.getConnection().prepareStatement(
+            "SELECT item_name FROM menu_items WHERE items_id = ?");
+    PreparedStatement findItemPrice = connection.getConnection().prepareStatement(
+            "SELECT item_price FROM menu_items WHERE items_id = ?");
+    PreparedStatement findCartQuantity = connection.getConnection().prepareStatement(
+            "SELECT item_quantity FROM cart WHERE item_id = ?");
+    PreparedStatement findCartTotal = connection.getConnection().prepareStatement(
+            "SELECT total_price FROM cart WHERE item_id = ?");
     ResultSet resultSet ;
 
     public Recipt() throws SQLException {
@@ -31,7 +40,8 @@ public class Recipt {
                 System.out.print("Item name:\t");
             }
             int id=arrayList.get(x);
-            resultSet = statement.executeQuery("SELECT item_name FROM menu_items where items_id ="+id+";");
+            findItemName.setInt(1, id);
+            resultSet = findItemName.executeQuery();
             while (resultSet.next()) {
                 System.out.print(resultSet.getString(1) + "\t\t");
             }
@@ -44,7 +54,8 @@ public class Recipt {
                 System.out.print("item price:\t");
             }
             int id=arrayList.get(x);
-            resultSet = statement.executeQuery("SELECT item_price FROM menu_items where items_id ="+id+";");
+            findItemPrice.setInt(1, id);
+            resultSet = findItemPrice.executeQuery();
             while (resultSet.next()) {
                 System.out.print(resultSet.getFloat(1) + "\t\t");
             }
@@ -58,7 +69,8 @@ public class Recipt {
                 System.out.print(" quantity:\t");
             }
             int id=arrayList.get(x);
-            resultSet = statement.executeQuery("SELECT item_quantity FROM cart where item_id ="+id+";");
+            findCartQuantity.setInt(1, id);
+            resultSet = findCartQuantity.executeQuery();
             while (resultSet.next()) {
                 System.out.print(resultSet.getInt(1) + "\t\t\t");
             }
@@ -72,7 +84,8 @@ public class Recipt {
                 System.out.print("Total price:");
             }
             int id=arrayList.get(x);
-            resultSet = statement.executeQuery("SELECT total_price FROM cart where item_id =" + id + ";");
+            findCartTotal.setInt(1, id);
+            resultSet = findCartTotal.executeQuery();
             while (resultSet.next()) {
                 System.out.print(resultSet.getFloat(1) + "\t\t");
             }

@@ -5,7 +5,7 @@ import org.majed.project252.admin.DisplayItems;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.PreparedStatement;
 import java.util.Scanner;
 
 public class Add_Item_Command implements AdminCommand {
@@ -17,7 +17,10 @@ public class Add_Item_Command implements AdminCommand {
     private Admin_Receiver admin_receiver;
     Scanner scanner=new Scanner(System.in);
     DBConnection connection = DBConnection.getInstance();
-    Statement statement = connection.getConnection().createStatement();
+    PreparedStatement findById = connection.getConnection().prepareStatement(
+            "SELECT items_id FROM menu_items WHERE items_id = ?");
+    PreparedStatement findByName = connection.getConnection().prepareStatement(
+            "SELECT item_name FROM menu_items WHERE item_name = ?");
     ResultSet resultSet;
 
     public Add_Item_Command(Admin_Receiver admin_receiver) throws SQLException {
@@ -28,7 +31,8 @@ public class Add_Item_Command implements AdminCommand {
         while (true){
             System.out.print("Enter Item ID, Must be new Id (dose`t already define): ");
             item_Id=scanner.nextInt();
-            resultSet=statement.executeQuery("SELECT items_id FROM menu_items where items_id ="+item_Id+";");
+            findById.setInt(1, item_Id);
+            resultSet=findById.executeQuery();
             if(resultSet.next()) {
                 System.out.println("\nThe ID: [" + item_Id + "] is already taken");
                 continue;
@@ -42,14 +46,14 @@ public class Add_Item_Command implements AdminCommand {
         while (true) {
             item_name = scanner.next();
 
-            resultSet = statement.executeQuery("SELECT item_name FROM menu_items where item_name ='" + item_name + "';");
+            findByName.setString(1, item_name);
+            resultSet = findByName.executeQuery();
             if (resultSet.next()) {
                 System.out.println("\nThe name [" + item_name + "] is already taken" +
                         "\nPlease Try Another Name: ");
             } else
                 break;
         }
-        item_name="'"+item_name+"'";
 
     }
 

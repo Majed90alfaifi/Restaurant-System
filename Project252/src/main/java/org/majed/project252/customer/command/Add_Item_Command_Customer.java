@@ -4,7 +4,7 @@ import org.majed.project252.DB.DBConnection;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.PreparedStatement;
 import java.util.Scanner;
 
 public class Add_Item_Command_Customer implements CustomerCommand {
@@ -13,7 +13,16 @@ public class Add_Item_Command_Customer implements CustomerCommand {
     int item_Real_quantity;
 
     DBConnection connection = DBConnection.getInstance();
-    Statement statement = connection.getConnection().createStatement();
+    PreparedStatement findItemById = connection.getConnection().prepareStatement(
+            "SELECT * FROM menu_items WHERE items_id = ?");
+    PreparedStatement findCartItem = connection.getConnection().prepareStatement(
+            "SELECT item_id FROM cart WHERE item_id = ?");
+    PreparedStatement updateCartItem = connection.getConnection().prepareStatement(
+            "UPDATE cart SET item_quantity = ?, total_price = ? WHERE item_id = ?");
+    PreparedStatement insertCartItem = connection.getConnection().prepareStatement(
+            "INSERT INTO cart (item_id, item_quantity, total_price) VALUES (?, ?, ?)");
+    PreparedStatement updateItemQuantity = connection.getConnection().prepareStatement(
+            "UPDATE menu_items SET item_quantity = ? WHERE items_id = ?");
     ResultSet resultSet ;
 
     Scanner scanner =new Scanner(System.in);
@@ -34,18 +43,26 @@ public class Add_Item_Command_Customer implements CustomerCommand {
             this.item_Quantity(id);
             this.total_price(id);
             float totalPrice=item_price*item_quantity;
-            resultSet = statement.executeQuery("SELECT item_id FROM cart where item_id ="+id+";");
+            findCartItem.setInt(1, id);
+            resultSet = findCartItem.executeQuery();
             if(resultSet.next()){
-                statement.executeUpdate("UPDATE cart SET item_quantity = "+item_quantity+" , total_price ="+totalPrice+" WHERE (item_id = "+id+");");
+                updateCartItem.setInt(1, item_quantity);
+                updateCartItem.setFloat(2, totalPrice);
+                updateCartItem.setInt(3, id);
+                updateCartItem.executeUpdate();
             }else {
-                statement.executeUpdate("INSERT INTO cart (item_id, item_quantity, total_price) VALUES (" + id + ", " + item_quantity + ", "+totalPrice+");");
+                insertCartItem.setInt(1, id);
+                insertCartItem.setInt(2, item_quantity);
+                insertCartItem.setFloat(3, totalPrice);
+                insertCartItem.executeUpdate();
             }
         }
 
     }
 
     boolean checkItemAvailability(int item_id) throws SQLException {
-        resultSet = statement.executeQuery("SELECT * FROM menu_items where items_id ="+item_id+";");
+        findItemById.setInt(1, item_id);
+        resultSet = findItemById.executeQuery();
         if(resultSet.next()){
             return true;
         }else {
@@ -56,7 +73,8 @@ public class Add_Item_Command_Customer implements CustomerCommand {
 
 
     void item_Quantity(int item_id) throws SQLException {
-        resultSet = statement.executeQuery("SELECT * FROM menu_items where items_id ="+item_id+";");
+        findItemById.setInt(1, item_id);
+        resultSet = findItemById.executeQuery();
         if(resultSet.next()) {
             item_Real_quantity = resultSet.getInt("item_quantity");
             item_price = resultSet.getFloat("item_price");
@@ -74,7 +92,9 @@ public class Add_Item_Command_Customer implements CustomerCommand {
             }
 
             item_Real_quantity = item_Real_quantity - item_quantity;
-            statement.executeUpdate("UPDATE menu_items SET item_quantity = " + item_Real_quantity + " WHERE (items_id = " + item_id + ");");
+            updateItemQuantity.setInt(1, item_Real_quantity);
+            updateItemQuantity.setInt(2, item_id);
+            updateItemQuantity.executeUpdate();
         }
     }
 
